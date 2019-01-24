@@ -307,8 +307,8 @@ core::handle_hello(int heartbeat_interval)
 void
 core::handle_close()
 {
-  this->dhttps->send("Debugging: WebSocket was closed! Trying to restart!",
-                     channel_mapping->begin()->second);
+  // this->dhttps->send("Debugging: WebSocket was closed! Trying to restart!",
+  //                   channel_mapping->begin()->second);
   // ShowError("WebSocket was closed! Trying to restart!");
   logger->print("Websocket was closed! Trying to restart!", log_type::status);
   this->dwss.reset(new websocket(
