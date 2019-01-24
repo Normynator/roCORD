@@ -1,3 +1,4 @@
+command -v patch >/dev/null 2>&1 || { echo "I require patch but it's not installed.  Aborting." >&2; exit 1; }
 cp -r ../rathena ../rathena.bk
 mkdir ../rathena/src/map/discord
 mkdir ../rathena/conf/discord
