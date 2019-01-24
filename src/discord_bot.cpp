@@ -31,6 +31,11 @@ void discord_handle()
  */
 TIMER_FUNC(discord_handle)
 {
+  if (!dcore) {
+	  logger->print("core is not running!", rocord::log_type::error);
+	  return -1;
+  }
+
   dcore->handle_events();
   // handle logs
   //add_timer(gettick() + 100, discord_handle, 0, 0);
@@ -43,6 +48,16 @@ TIMER_FUNC(discord_handle)
  */
 void discord_send(const char *msg, const char *channel, const char *name)
 {
+  if (!dcore) {
+	  logger->print("core is not running!", rocord::log_type::error);
+	  return;
+  }
+
+  if (!msg || !channel || !name) {
+	  logger->print("discord_send arguments contained nullptr!", rocord::log_type::error);
+	  return;
+  }
+
   std::string msg_s = msg;
   std::string channel_s = channel;
   std::string name_s = name;
@@ -54,6 +69,11 @@ void discord_send(const char *msg, const char *channel, const char *name)
  */
 int discord_script(const char *msg, const char *channel)
 {
+  if (!dcore) {
+	  logger->print("core is not running!", rocord::log_type::error);
+	  return -1;
+  }
+
   std::string msg_s = msg;
   std::string channel_s = channel;
   return dcore->to_discord(msg_s, channel_s, nullptr);
@@ -64,6 +84,11 @@ int discord_script(const char *msg, const char *channel)
  */
 void discord_announce_drop(const char *msg)
 {
+  if (!dcore) {
+	  logger->print("core is not running!", rocord::log_type::error);
+	  return;
+  }
+
   std::string channel = "drop_announce";
   std::string msg_s = msg;
   dcore->to_discord(msg_s, channel, nullptr);
@@ -74,6 +99,11 @@ void discord_announce_drop(const char *msg)
  */
 int discord_restart(const std::string &type)
 {
+  	if (!dcore) {
+		  logger->print("core is not running!", rocord::log_type::error);
+		  return -1;
+  	}
+
 	if (type == "soft") {
 		dcore->restart_websocket();		
 	} else {

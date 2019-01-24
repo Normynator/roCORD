@@ -45,6 +45,10 @@ int main(int argc, char **argv) {
 			return -1;
 		}
 	} else {
+
+		// Temporary test
+		discord_send(nullptr, nullptr, nullptr);
+
     		int err = discord_init();
     		if (err == -1)
        			return 0;
@@ -53,6 +57,9 @@ int main(int argc, char **argv) {
 		std::string name = "test_user";
 		std::string channel = "general";
 		std::string msg = "Test message!"; 
+		// Temporary nullptr test until the actual test is coded!
+		discord_send(NULL, NULL, NULL);
+		discord_send(nullptr, nullptr, nullptr);
 
     		while(i < 10) {
         		discord_handle();

@@ -20,7 +20,8 @@ if (DEFINED TRAVIS OR DEFINED STAND_ALONE)
         src/discord_core.cpp 
         src/discord_error.cpp 
         src/discord_http.cpp 
-        src/discord_websocket.cpp 
+        src/discord_websocket.cpp
+		# src/discord_request.cpp	
         src/main.cpp 
         src/clif_testing.cpp 
         src/showmsg_testing.cpp 
