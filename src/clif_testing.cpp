@@ -9,6 +9,8 @@
 #include "clif_testing.hpp"
 #include <iostream>
 
-void test(int num) {
-    std::cout << num << std::endl;
+void
+test(int num)
+{
+  std::cout << num << std::endl;
 }

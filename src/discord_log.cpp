@@ -16,7 +16,8 @@ log::~log()
 {
 }
 
-void log::print(std::string message, log_type ltype, bool need_sync)
+void
+log::print(std::string message, log_type ltype, bool need_sync)
 {
   // lock
   // need types, src and so on
@@ -35,7 +36,8 @@ void log::print(std::string message, log_type ltype, bool need_sync)
   }
 }
 
-void log::handle_print()
+void
+log::handle_print()
 {
   if (!m.try_lock())
     return;
@@ -44,23 +46,25 @@ void log::handle_print()
     m.unlock();
     return;
   }
-  while(!print_queue.empty()) {
-  	auto entry = print_queue.front();
-  	print_queue.pop();
-  	do_print(*entry);
+  while (!print_queue.empty()) {
+    auto entry = print_queue.front();
+    print_queue.pop();
+    do_print(*entry);
   }
   m.unlock();
 }
 
-void log::welcome()
+void
+log::welcome()
 {
   ShowStatus("%s", "Loading roCORD by norm\n");
 }
 
-void log::do_print(log_entry& entry)
+void
+log::do_print(log_entry& entry)
 {
   const char* format = "%s\n";
-  switch(entry.get_type()) {
+  switch (entry.get_type()) {
     case log_type::warning:
       ShowWarning(format, entry.get_message().c_str());
       break;

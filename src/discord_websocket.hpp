@@ -22,29 +22,31 @@
 namespace rocord {
 class core;
 
-class websocket {
+class websocket
+{
 public:
-  websocket(std::string token, std::string uri, std::shared_ptr<log> logger); // TODO copy by value
+  websocket(std::string token, std::string uri,
+            std::shared_ptr<log> logger); // TODO copy by value
   virtual ~websocket();
   void final();
-  std::function<void(core *)> get_next_event();
+  std::function<void(core*)> get_next_event();
   void start();
-  void send_identify(const std::string &token, const std::string &presence);
+  void send_identify(const std::string& token, const std::string& presence);
   void start_heartbeat(int interval);
   std::chrono::time_point<std::chrono::system_clock> getStartTime();
 
 private:
-  void
-  on_message(websocketpp::client<websocketpp::config::asio_tls_client> *client,
-             websocketpp::connection_hdl hdl,
-             websocketpp::config::asio_tls_client::message_type::ptr msg);
+  void on_message(
+    websocketpp::client<websocketpp::config::asio_tls_client>* client,
+    websocketpp::connection_hdl hdl,
+    websocketpp::config::asio_tls_client::message_type::ptr msg);
   void on_close(websocketpp::connection_hdl hdl);
   void on_fail(websocketpp::connection_hdl hdl);
   void on_open(websocketpp::connection_hdl hdl);
   void on_socket_init(websocketpp::connection_hdl);
   void do_shutdown();
-  websocketpp::lib::shared_ptr<boost::asio::ssl::context>
-      on_tls_init(websocketpp::connection_hdl);
+  websocketpp::lib::shared_ptr<boost::asio::ssl::context> on_tls_init(
+    websocketpp::connection_hdl);
   void run();
   std::chrono::high_resolution_clock::time_point c_start;
   std::chrono::high_resolution_clock::time_point c_socket_init;
@@ -64,9 +66,9 @@ private:
   std::thread socket_thr;
   std::shared_ptr<log> logger;
   websocketpp::client<websocketpp::config::asio_tls_client> client;
-  std::queue<std::function<void(core *)>> event_queue;
+  std::queue<std::function<void(core*)>> event_queue;
   websocketpp::client<websocketpp::config::asio_tls_client>::connection_ptr
-      connection;
+    connection;
   std::mutex m;
   std::mutex c;
 };

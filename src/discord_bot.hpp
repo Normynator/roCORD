@@ -20,10 +20,10 @@ TIMER_FUNC(discord_handle);
 #else
 void discord_handle();
 #endif
-void discord_send(const char *msg, const char *channel, const char *name);
+void discord_send(const char* msg, const char* channel, const char* name);
 int discord_init();
 void discord_free();
-int discord_script(const char *msg, const char *channel);
-void discord_announce_drop(const char *msg);
+int discord_script(const char* msg, const char* channel);
+void discord_announce_drop(const char* msg);
 
 #endif /* discord_bot_hpp */

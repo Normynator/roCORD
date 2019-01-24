@@ -12,9 +12,10 @@
 #include <stdio.h>
 #include <string>
 
-struct Error {
-    int id;
-    std::string message;
+struct Error
+{
+  int id;
+  std::string message;
 };
 
 #endif /* discord_error_hpp */

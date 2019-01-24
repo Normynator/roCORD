@@ -13,15 +13,16 @@
 
 namespace rocord {
 
-enum log_type {
-    debug  = 0x01,
-    info    = 0x02,
-    status  = 0x04,
-    warning = 0x08,
-    error   = 0x0C
+enum log_type
+{
+  debug = 0x01,
+  info = 0x02,
+  status = 0x04,
+  warning = 0x08,
+  error = 0x0C
 };
 
-class log_entry 
+class log_entry
 {
 public:
   log_entry(std::string message, log_type ltype);
