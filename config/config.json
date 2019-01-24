@@ -1,6 +1,7 @@
 {
     "version": 1,
     "debug": 0,
+		"log_level": 255,
     "display_name": "roCORD",
     "token": "NDY4NTM2MTUyNjE4Njk2NzA4.DpWT3w.p0CGUK72FSvt0qcKr8XwtsmCdNE",
     "presence": "by Normynator",

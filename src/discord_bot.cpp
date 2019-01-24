@@ -16,8 +16,10 @@
 
 using namespace nlohmann;
 
+// TODO remove global vars
 std::unique_ptr<rocord::core> dcore;
-std::shared_ptr<rocord::log> logger;
+std::shared_ptr<rocord::log> logger =
+  std::shared_ptr<rocord::log>(new rocord::log());
 
 #ifdef TESTING
 void
@@ -125,6 +127,7 @@ discord_restart(const std::string& type)
  *{
  *      "version": 1,                   # Required
  *      "debug": 0,
+ *      "log_level": 255 (*)
  *      "display_name": "roCORD",
  *      "token": "<token>",             # Required
  *      "presence": "by Normynator",
@@ -132,11 +135,21 @@ discord_restart(const std::string& type)
  *         "general": "1234567890"      # Required
  *      }
  *}
+ *
+ * (*) the log level is computed this way:
+ * debug:		1
+ * info:		2
+ * status:	4
+ * warning: 8
+ * error:		12
+ *
+ * now you can combine any log levels like this:
+ *	error, warning and status => 12 + 8 + 4 = 24
+ *	so log_level would be 24.
  */
 int
 discord_init()
 {
-  logger = std::shared_ptr<rocord::log>(new rocord::log());
   // ShowStatus("Loading roCORD by norm\n");
   logger->welcome();
 #ifdef TESTING
@@ -157,6 +170,13 @@ discord_init()
 
   try {
     data = json::parse(ifs);
+
+    if (data.find("log_level") != data.end())
+      logger->set_level(data.at("log_level"));
+    else
+      logger->print("Log level is not defined. Using default value!",
+                    rocord::log_type::warning);
+
     if (data.find("token") != data.end())
       token = data.at("token");
     else {
@@ -228,10 +248,3 @@ discord_init()
 #endif
   return 0;
 }
-
-/*
- * currently not needed because of unique ptr destruct!
-        void discord_free() {
-                dcore.reset();
-        }
- */

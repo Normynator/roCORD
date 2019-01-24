@@ -27,11 +27,13 @@ public:
   // TODO copy by value
   void handle_print();
   void welcome();
+  void set_level(int level);
 
 private:
   void do_print(log_entry& entry);
   std::mutex m;
   std::queue<std::shared_ptr<log_entry>> print_queue;
+  int level = 0xFF;
 };
 }
 #endif /* discord_log_hpp*/

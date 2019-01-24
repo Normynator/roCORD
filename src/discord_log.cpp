@@ -17,15 +17,18 @@ log::~log()
 }
 
 void
+log::set_level(int level)
+{
+  this->level = level;
+}
+
+void
 log::print(std::string message, log_type ltype, bool need_sync)
 {
-  // lock
-  // need types, src and so on
-
   // HARDCODED logging level
-  int level = 0xFF;
+  // int level = 0xFF;
 
-  if (level & ltype) {
+  if (this->level & ltype) {
     std::shared_ptr<log_entry> entry(new log_entry(message, ltype));
     if (!need_sync) {
       do_print(*entry);
