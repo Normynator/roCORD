@@ -1,14 +1,21 @@
 message (STATUS "Looking for libs for Discord!")
+
+# enable C++11 standard amd set cmake version
 cmake_minimum_required (VERSION 3.6)
+set (CMAKE_CXX_STANDARD 11)
 
-set (CMAKE_CXX_STANDARD 11)  # enable C++11 standard
-
-#set (CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++1y -Wall")
- 
+# Checking the mode for the bot.
+# TRAVIS: For running travis CI or lgtm.
+#	STAND_ALONE: For stand alone, running the bot wihtout rAthena
+# else: Bot is going to run with rAthena.
 if (DEFINED TRAVIS OR DEFINED STAND_ALONE)
 	project (roCORD)
-    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} 
+  set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} 
                         "${CMAKE_SOURCE_DIR}/third_party/CMake/Modules/")
+
+	# TODO: nameclash with cmake arg "TESTING" and "TESTING" used in the
+	# code.
+	# This "TESTING" is used to enable the stand alone code.
 	set (CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -D TESTING")
 	set (roCORD_src
         src/discord_member.cpp
@@ -21,7 +28,6 @@ if (DEFINED TRAVIS OR DEFINED STAND_ALONE)
         src/discord_error.cpp 
         src/discord_http.cpp 
         src/discord_websocket.cpp
-		# src/discord_request.cpp	
         src/main.cpp 
         src/clif_testing.cpp 
         src/showmsg_testing.cpp 
@@ -29,9 +35,13 @@ if (DEFINED TRAVIS OR DEFINED STAND_ALONE)
         test/bot_test.cpp
         test/filter_test.cpp
 		test/integration/core_integration.cpp)
-
+	
+	# The TESTING argument is for enabling gtest/gmock
+	# It is used by the lgtm config. lgtm config defines this variable with "OFF"
+	# so testing will be disabled.
+	# (note: this is also disabled when setting TESTING=ON. TODO fix)
   if (NOT DEFINED TESTING) 
-	# Download and unpack googletest at configure time
+			# Download and unpack googletest at configure time
     	configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
     	execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
       		RESULT_VARIABLE result
@@ -60,8 +70,9 @@ if (DEFINED TRAVIS OR DEFINED STAND_ALONE)
   message (STATUS "Using stand_alone setup!")
   include_directories(${CMAKE_SOURCE_DIR}/third_party)
 
-else () #RELEASE
+else ()
 
+	# Release mode. Runs with rAthena (see above)
   set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/3rdparty/CMake/Modules/")
 	message (STATUS "Using release setup!")
   set(roCORD_src
@@ -79,8 +90,11 @@ else () #RELEASE
 
 endif ()
 
+# Setting boost related varables.
 set (Boost_USE_STATIC_LIBS ON)
 set (Boost_USE_MULTITHREAD ON)
+
+# Looking for all required packages.
 find_package (Boost 1.53.0 COMPONENTS REQUIRED system chrono filesystem locale)
 find_package (Iconv REQUIRED)
 find_package (OpenSSL REQUIRED)
@@ -89,10 +103,13 @@ find_package (Threads REQUIRED)
 if(NOT APPLE)
 	find_package (ICU COMPONENTS REQUIRED data i18n io lx tu uc)
 endif()
+
 include_directories (${Boost_INCLUDE_DIR} ${ICU_INCLUDE_DIR} 
                      ${Iconv_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR} 
                      ${CURL_INCLUDE_DIRS})
 
+# If TRAVIS or STAND_ALONE enavle some warning/error messages
+# and create a executable instead of a library.
 if (DEFINED TRAVIS OR DEFINED STAND_ALONE)
 	add_executable (roCORD ${roCORD_src})
 	target_compile_options (roCORD PRIVATE -std=c++1y -Wall -pedantic-errors -Wuninitialized -Werror) #-Wextra
@@ -100,6 +117,7 @@ else ()
 	add_library (roCORD ${roCORD_src})
 endif ()
 
+# Linking depending on TRAVIS, STAND_ALONE or rAthena.
 if (DEFINED TRAVIS OR DEFINED STAND_ALONE)
 	target_link_libraries (roCORD ${Boost_LIBRARIES} ${ICU_LIBRARIES} 
                          ${Iconv_LIBRARIES} ${OPENSSL_LIBRARIES} 
