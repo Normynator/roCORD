@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.3.0">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>40</x>
+      <y>160</y>
+      <w>240</w>
+      <h>190</h>
+    </coordinates>
+    <panel_attributes>rocord::message
+--
+-id: uint64_t
+-channel_id: uint64_t
+-content: std::string
+--
++get_content(void): std::string&amp;
+--
+Responsibilities
+-- can represent:
+   - actual discord message
+   - messages from rAthena channel</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>320</x>
+      <y>140</y>
+      <w>360</w>
+      <h>250</h>
+    </coordinates>
+    <panel_attributes>rocord::channel
+--
+-id: uint64_t
+-type: int
+-message_queue&lt;message&gt;: boost spsc_queue
+-message_hist: std::vector&lt;std::shared_ptr&lt;message&gt; &gt;
+-limit: int
+-reset: uint64_t
+-remaining: int
+--
++get_message(uint64_t message_id): *message_ptr
++new_message(message &amp;msg): void
++add_message(message &amp;msg): void
+--
+Responsibilities
+-- holds messages which still have to be processed.
+-- holds all processed messages.</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>
