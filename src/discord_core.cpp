@@ -356,7 +356,7 @@ core::handle_cmd_uptime(const std::string& channel_id)
   std::ostringstream ss;
   ss << "Uptime:\n--> Bot: " << bot_uptime_h << "h " << bot_uptime_m
      << "m\n--> Socket: " << socket_uptime_h << "h " << socket_uptime_m
-     << "m\n--> Server: not available";
+     << "m\n"; //--> Server: not available";
   this->dhttps->send(ss.str(), channel_id);
 }
 
