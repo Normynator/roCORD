@@ -1,0 +1,113 @@
+From 777b0bd61aeafe822ab69313b761b832ebb2057a Mon Sep 17 00:00:00 2001
+From: sctnightcore <23263315+sctnightcore@users.noreply.github.com>
+Date: Sat, 4 May 2019 02:22:16 +0700
+Subject: [PATCH] Add files via upload
+
+---
+ src/map/CMakeLists.txt |  4 ++--
+ src/map/channel.cpp    |  3 ++-
+ src/map/mob.cpp        |  3 ++-
+ src/map/script.cpp     | 15 ++++++++++++++-
+ 4 files changed, 20 insertions(+), 5 deletions(-)
+
+diff --git a/src/map/CMakeLists.txt b/src/map/CMakeLists.txt
+index a066cc0f7b..43169f9b9b 100644
+--- a/src/map/CMakeLists.txt
++++ b/src/map/CMakeLists.txt
+@@ -2,7 +2,7 @@
+ # setup
+ #
+ set( MAP_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}  CACHE INTERNAL "" )
+-
++add_subdirectory (discord)
+ 
+ #
+ # map server
+@@ -32,7 +32,7 @@ include_directories( ${INCLUDE_DIRS} )
+ add_executable( map-server ${SOURCE_FILES} )
+ #message( STATUS "map-server LIBRARIES=${LIBRARIES}, DEPENDENCIES=${DEPENDENCIES} DEFINITIONS=${DEFINITIONS}")
+ add_dependencies( map-server ${DEPENDENCIES} )
+-target_link_libraries( map-server ${LIBRARIES} ${DEPENDENCIES} )
++target_link_libraries( map-server ${LIBRARIES} ${DEPENDENCIES} roCORD )
+ set_target_properties( map-server PROPERTIES COMPILE_FLAGS "${DEFINITIONS}" )
+ if( INSTALL_COMPONENT_RUNTIME )
+ 	cpack_add_component( Runtime_mapserver DESCRIPTION "map-server" DISPLAY_NAME "map-server" GROUP Runtime )
+diff --git a/src/map/channel.cpp b/src/map/channel.cpp
+index fee78b6b57..66d506ed31 100644
+--- a/src/map/channel.cpp
++++ b/src/map/channel.cpp
+@@ -20,7 +20,7 @@
+ #include "map.hpp" //msg_conf
+ #include "pc.hpp"
+ #include "pc_groups.hpp"
+-
++#include "discord/discord_bot.hpp"
+ static DBMap* channel_db; // channels
+ 
+ struct Channel_Config channel_config;
+@@ -455,6 +455,7 @@ int channel_send(struct Channel *channel, struct map_session_data *sd, const cha
+ 			color = channel_config.colors[sd->fontcolor];
+ 		safesnprintf(output, CHAT_SIZE_MAX, "%s %s : %s", channel->alias, sd->status.name, msg);
+ 		clif_channel_msg(channel,output,color);
++		discord_send(msg, channel->name, sd->status.name);
+ 		sd->channel_tick[idx] = gettick();
+ 	}
+ 	return 0;
+diff --git a/src/map/mob.cpp b/src/map/mob.cpp
+index 9ce390b033..073bf8ae69 100644
+--- a/src/map/mob.cpp
++++ b/src/map/mob.cpp
+@@ -39,7 +39,7 @@
+ #include "pc.hpp"
+ #include "pet.hpp"
+ #include "quest.hpp"
+-
++#include "discord/discord_bot.hpp"
+ using namespace rathena;
+ 
+ #define ACTIVE_AI_RANGE 2	//Distance added on top of 'AREA_SIZE' at which mobs enter active AI mode.
+@@ -2770,6 +2770,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
+ 				sprintf (message, msg_txt(NULL,541), mvp_sd->status.name, md->name, it->jname, (float)drop_rate/100);
+ 				//MSG: "'%s' won %s's %s (chance: %0.02f%%)"
+ 				intif_broadcast(message,strlen(message)+1,BC_DEFAULT);
++				discord_announce_drop(message);
+ 			}
+ 			// Announce first, or else ditem will be freed. [Lance]
+ 			// By popular demand, use base drop rate for autoloot code. [Skotlex]
+diff --git a/src/map/script.cpp b/src/map/script.cpp
+index 06c103200b..d85c9bdde0 100644
+--- a/src/map/script.cpp
++++ b/src/map/script.cpp
+@@ -60,6 +60,7 @@
+ #include "pet.hpp"
+ #include "quest.hpp"
+ #include "storage.hpp"
++#include "discord/discord_bot.hpp"
+ 
+ struct eri *array_ers;
+ DBMap *st_db;
+@@ -24438,11 +24439,23 @@ BUILDIN_FUNC(preg_match) {
+ 	return SCRIPT_CMD_SUCCESS;
+ #endif
+ }
+-
++/*
++* Sends a message via script cmd to server
++*/
++BUILDIN_FUNC(discord) {
++ 	const char* msg = script_getstr(st,2);
++ 	const char* channel = script_getstr(st,3);
++ 	const int ret = discord_script(msg, channel);
++ 	if(ret == 0)
++ 		return SCRIPT_CMD_SUCCESS;
++ 	else
++ 		return SCRIPT_CMD_FAILURE;
++}
+ /// script command definitions
+ /// for an explanation on args, see add_buildin_func
+ struct script_function buildin_func[] = {
+ 	// NPC interaction
++	BUILDIN_DEF(discord,"ss"),
+ 	BUILDIN_DEF(mes,"s*"),
+ 	BUILDIN_DEF(next,""),
+ 	BUILDIN_DEF(clear,""),
