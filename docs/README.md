@@ -19,6 +19,7 @@ Currently, roCORD is only written to run under Debian and CentOS. The bot recomm
 - Manual Installation
   - [Debian](https://github.com/Normynator/roCORD/blob/development/docs/installation_debian_manual.md)
   - [CentOS](https://github.com/Normynator/roCORD/blob/development/docs/installation_centos_manual.md)
+  - [Ubuntu](https://github.com/Normynator/roCORD/blob/master/docs/installation_ubuntu_manual.md)
   - [Windows] - currently unsopported
   
 - [Discord Bot Setup](https://github.com/nubspixel/roCORD/blob/development/docs/discord.md)  

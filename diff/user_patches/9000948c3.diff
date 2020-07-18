@@ -1,0 +1,129 @@
+diff --git src/custom/script.inc src/custom/script.inc
+index 839b990cb..5cc75a523 100644
+--- src/custom/script.inc
++++ src/custom/script.inc
+@@ -17,3 +17,16 @@
+ //	script_pushint(st,1);
+ //	return 0;
+ //}
++
++/*
++* Sends a message via script cmd to server
++*/
++BUILDIN_FUNC(discord) {
++ 	const char* msg = script_getstr(st,2);
++ 	const char* channel = script_getstr(st,3);
++ 	const int ret = discord_script(msg, channel);
++ 	if(ret == 0)
++ 		return SCRIPT_CMD_SUCCESS;
++ 	else
++ 		return SCRIPT_CMD_FAILURE;
++}
+diff --git src/custom/script_def.inc src/custom/script_def.inc
+index 886399273..f2ce97f14 100644
+--- src/custom/script_def.inc
++++ src/custom/script_def.inc
+@@ -9,3 +9,5 @@
+  **/
+ 
+ //BUILDIN_DEF(example,""),
++
++BUILDIN_DEF(discord,"ss"),
+diff --git src/map/CMakeLists.txt src/map/CMakeLists.txt
+index a066cc0f7..924cbf06d 100644
+--- src/map/CMakeLists.txt
++++ src/map/CMakeLists.txt
+@@ -3,6 +3,7 @@
+ #
+ set( MAP_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}  CACHE INTERNAL "" )
+ 
++add_subdirectory (discord)
+ 
+ #
+ # map server
+@@ -32,7 +33,7 @@ include_directories( ${INCLUDE_DIRS} )
+ add_executable( map-server ${SOURCE_FILES} )
+ #message( STATUS "map-server LIBRARIES=${LIBRARIES}, DEPENDENCIES=${DEPENDENCIES} DEFINITIONS=${DEFINITIONS}")
+ add_dependencies( map-server ${DEPENDENCIES} )
+-target_link_libraries( map-server ${LIBRARIES} ${DEPENDENCIES} )
++target_link_libraries( map-server ${LIBRARIES} ${DEPENDENCIES} roCORD )
+ set_target_properties( map-server PROPERTIES COMPILE_FLAGS "${DEFINITIONS}" )
+ if( INSTALL_COMPONENT_RUNTIME )
+ 	cpack_add_component( Runtime_mapserver DESCRIPTION "map-server" DISPLAY_NAME "map-server" GROUP Runtime )
+diff --git src/map/channel.cpp src/map/channel.cpp
+index f1cd24101..0fe84fd2f 100644
+--- src/map/channel.cpp
++++ src/map/channel.cpp
+@@ -21,6 +21,8 @@
+ #include "pc.hpp"
+ #include "pc_groups.hpp"
+ 
++#include "discord/discord_bot.hpp"
++
+ static DBMap* channel_db; // channels
+ 
+ struct Channel_Config channel_config;
+@@ -455,6 +457,7 @@ int channel_send(struct Channel *channel, struct map_session_data *sd, const cha
+ 			color = channel_config.colors[sd->fontcolor];
+ 		safesnprintf(output, CHAT_SIZE_MAX, "%s %s : %s", channel->alias, sd->status.name, msg);
+ 		clif_channel_msg(channel,output,color);
++		discord_send(msg, channel->name, sd->status.name);
+ 		sd->channel_tick[idx] = gettick();
+ 	}
+ 	return 0;
+diff --git src/map/map.cpp src/map/map.cpp
+index 43c84dcb7..6b8a6a2df 100644
+--- src/map/map.cpp
++++ src/map/map.cpp
+@@ -50,6 +50,8 @@
+ #include "storage.hpp"
+ #include "trade.hpp"
+ 
++#include "discord/discord_bot.hpp"
++
+ using namespace rathena;
+ 
+ char default_codepage[32] = "";
+@@ -5252,6 +5254,8 @@ int do_init(int argc, char *argv[])
+ 	do_init_vending();
+ 	do_init_buyingstore();
+ 
++	discord_init();
++
+ 	npc_event_do_oninit();	// Init npcs (OnInit)
+ 
+ 	if (battle_config.pk_mode)
+diff --git src/map/mob.cpp src/map/mob.cpp
+index f74907f8b..491e7f232 100644
+--- src/map/mob.cpp
++++ src/map/mob.cpp
+@@ -40,6 +40,8 @@
+ #include "pet.hpp"
+ #include "quest.hpp"
+ 
++#include "discord/discord_bot.hpp"
++
+ using namespace rathena;
+ 
+ #define ACTIVE_AI_RANGE 2	//Distance added on top of 'AREA_SIZE' at which mobs enter active AI mode.
+@@ -2796,6 +2798,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
+ 				sprintf (message, msg_txt(NULL,541), mvp_sd->status.name, md->name, it->jname, (float)drop_rate/100);
+ 				//MSG: "'%s' won %s's %s (chance: %0.02f%%)"
+ 				intif_broadcast(message,strlen(message)+1,BC_DEFAULT);
++				discord_announce_drop(message);
+ 			}
+ 			// Announce first, or else ditem will be freed. [Lance]
+ 			// By popular demand, use base drop rate for autoloot code. [Skotlex]
+diff --git src/map/script.cpp src/map/script.cpp
+index 25c607fff..f6df06a82 100644
+--- src/map/script.cpp
++++ src/map/script.cpp
+@@ -62,6 +62,8 @@
+ #include "quest.hpp"
+ #include "storage.hpp"
+ 
++#include "discord/discord_bot.hpp"
++
+ using namespace rathena;
+ 
+ const int64 SCRIPT_INT_MIN = INT64_MIN;
